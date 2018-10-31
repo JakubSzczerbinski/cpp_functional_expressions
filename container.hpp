@@ -1,17 +1,13 @@
+#pragma once
+
 #include <type_traits>
 #include <vector>
 
-template <typename ... Bools>
-struct conjunction : std::true_type {};
+#include "conjunction.hpp"
+#include "void.hpp"
+#include "iterator.hpp"
+#include "empty.hpp"
 
-template <typename Bool>
-struct conjunction<Bool> : std::conditional_t<bool(Bool::value), std::true_type, std::false_type> {};
-
-template <typename Bool, typename ... Bools>
-struct conjunction<Bool, Bools ...> : std::conditional_t<bool(Bool::value), conjunction<Bools ...>, std::false_type> {};
-
-template <typename T>
-class Iterator;
 
 template <typename T>
 class Container
@@ -43,6 +39,9 @@ class Container
 template <typename T>
 void swap(Container<T>, Container<T>);
 
+
+
+
 template <typename Container, typename Element, typename _ = void>
 struct is_container : std::false_type {};
 
@@ -57,7 +56,7 @@ struct is_container <
         std::is_same<typename Container::reference, Element&>,
         std::is_same<typename Container::const_reference, const Element&>
       >::value,
-      std::void_t<
+      void_t<
         decltype(Container()),
         decltype(Container(Container())),
         decltype(Container().begin()),
@@ -68,11 +67,17 @@ struct is_container <
         decltype(Container().max_size()),
         decltype(Container().empty()),
         decltype(std::declval<Container>().swap(std::declval<Container&>())),
-        decltype(Container() == Container()),
-        decltype(Container() != Container())
+        decltype(swap(std::declval<Container&>(), std::declval<Container&>())),
+        decltype(bool(Container() == Container())),
+        decltype(bool(Container() != Container()))
       > 
     > 
   > : std::true_type {};
-static_assert(is_container<Container<int>, int>::value, "Object does not meet Container requirement");
-static_assert(is_container<std::vector<int>, int>::value, "Object does not meet Container requirement");
+
+/* is_container should be true Container<T> and T for all T, but we cant test that, so we test some instances :P */
+static_assert(is_container<Container<int>, int>::value, "Container interface doesnt pass is_container check");
+static_assert(is_container<Container<char>, char>::value, "Container interface doesnt pass is_container check");
+
+/* is_container should fail for class that doesnt implement container interface */
+static_assert(not is_container<Empty, int>::value, "Object that doesnt implement Container interface passes is_container check");
 
