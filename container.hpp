@@ -54,7 +54,8 @@ struct is_container <
       conjunction<
         std::is_same<typename Container::value_type, Element>,
         std::is_same<typename Container::reference, Element&>,
-        std::is_same<typename Container::const_reference, const Element&>
+        std::is_same<typename Container::const_reference, const Element&>,
+        is_iterator<typename Container::iterator>
       >::value,
       void_t<
         decltype(Container()),

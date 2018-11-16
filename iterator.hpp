@@ -3,6 +3,7 @@
 #include <type_traits>
 
 #include "empty.hpp"
+#include "void.hpp"
 
 template <typename T>
 class Iterator
